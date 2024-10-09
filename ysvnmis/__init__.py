@@ -1,17 +1,14 @@
 import pyodbc
 from flask import Flask
-import cloudinary
-import cloudinary.uploader
-
-
+from flasgger import Swagger
 
 app = Flask(__name__)
+
 app.secret_key = '*(&*(@*&(*@(^!(*@75876528378932^@%*&^(*@*@&#*'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SECRET_KEY'] = '38a5f73c-ff0f-4b81-b466-701071019a4d'
 
 
-from cloudinary.utils import cloudinary_url
 connection_string = (
     r"Driver={ODBC Driver 17 for SQL Server};"
     r"Server=DESKTOP-CKADOQQ\SQLEXPRESS;"  
@@ -20,12 +17,6 @@ connection_string = (
     "PWD=123456;"
 )
 
-cloudinary.config(
-    cloud_name = "dwvg5xlum",
-    api_key = "922611133231776",
-    api_secret = "Q0bJhJc_3Z06xk1mFMf0oDSgWxo", # Click 'View API Keys' above to copy your API secret
-    secure=True
-)
 
 try:
     connection = pyodbc.connect(connection_string)
@@ -44,3 +35,28 @@ def get_connection():
         print(f"Error: {ex}")
         return None
 
+swagger_template = {
+    "info": {
+        "title": "MSI API",
+        "description": "API document",
+        "version": "1.0.0"
+    },
+    "host": "localhost:5000",
+    "basePath": "/",
+    "schemes": ["http", "https"]
+}
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": 'apispec_1',
+            "route": '/apispec_1.json',
+            "rule_filter": lambda rule: True,  # Include all routes
+            "model_filter": lambda tag: True,  # Include all models
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/swagger/"
+}
+Swagger(app, template=swagger_template, config=swagger_config)

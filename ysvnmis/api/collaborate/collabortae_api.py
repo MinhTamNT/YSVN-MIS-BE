@@ -1,20 +1,68 @@
-import base64
-from flask import request, jsonify
+from flask import  request, jsonify
 from ysvnmis import *
 from ysvnmis.dao.collaborate import insert_data, get_all_data, update_data
-
-import base64
-
-def add_base64_padding(base64_string):
-    """Ensures the Base64 string has proper padding with '='"""
-    return base64_string + '=='[(len(base64_string) % 4):]
 
 
 @app.route("/api/create/collaborate", methods=["POST"])
 def create_collaborate():
+    """
+    Create a new collaboration entry
+    ---
+    tags:
+      - Collaboration
+    parameters:
+      - in: body
+        name: body
+        schema:
+          type: object
+          required:
+            - job_title
+            - start_time
+            - end_time
+          properties:
+            job_title:
+              type: string
+              description: The title of the job
+            start_time:
+              type: string
+              description: The start time
+            end_time:
+              type: string
+              description: The end time
+            priority:
+              type: string
+              description: Priority of the job
+            content:
+              type: string
+              description: Content description
+            with_person:
+              type: string
+              description: Collaborating with
+            transportation_mode:
+              type: string
+              description: Transportation mode
+            next_appointment:
+              type: string
+              description: Next appointment
+            referral:
+              type: string
+              description: Referral information
+            cost:
+              type: number
+              description: The cost involved
+            notes:
+              type: string
+              description: Additional notes
+            attachment:
+              type: string
+              description: Base64 encoded attachment file
+    responses:
+      201:
+        description: Collaboration created successfully
+      500:
+        description: Error while inserting data
+    """
     data = request.get_json()
-
-    # Extract fields from the form data
     job_title = data['job_title']
     start_time = data['start_time']
     end_time = data['end_time']
@@ -26,28 +74,7 @@ def create_collaborate():
     referral = data['referral']
     cost = data['cost']
     notes = data['notes']
-
-    try:
-
-        attachment_base64 = data.get('attachment')
-
-        if attachment_base64:
-
-            padded_base64 = add_base64_padding(attachment_base64)
-
-
-            attachment_bytes = base64.b64decode(padded_base64)
-
-            with open('attachment_file.png', 'wb') as f:
-                f.write(attachment_bytes)
-        else:
-            print("No attachment provided")
-    except KeyError as e:
-        print(f"Missing field: {str(e)}")
-        return jsonify({"error": f"Missing field: {str(e)}"}), 400
-    except Exception as e:
-        print(f"Error during processing: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+    attachment_base64 = data.get('attachment')
 
     try:
         insert_data(job_title, start_time, end_time, priority, content, with_person,
@@ -61,9 +88,19 @@ def create_collaborate():
     return jsonify({"message": "Data inserted successfully!"}), 201
 
 
-
 @app.route('/api/collaborate', methods=['GET'])
 def get_collaborate():
+    """
+    Get all collaboration data
+    ---
+    tags:
+      - Collaboration
+    responses:
+      200:
+        description: A list of collaboration data
+      500:
+        description: Error fetching data
+    """
     data = get_all_data()
     print(data)
     if data is not None:
@@ -74,6 +111,55 @@ def get_collaborate():
 
 @app.route('/api/collaborate/<int:id>', methods=['PUT'])
 def update_collaborate(id):
+    """
+    Update collaboration entry
+    ---
+    tags:
+      - Collaboration
+    parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: Collaboration ID
+      - in: body
+        name: body
+        schema:
+          type: object
+          properties:
+            job_title:
+              type: string
+            start_time:
+              type: string
+            end_time:
+              type: string
+            priority:
+              type: string
+            content:
+              type: string
+            with_person:
+              type: string
+            transportation_mode:
+              type: string
+            next_appointment:
+              type: string
+            referral:
+              type: string
+            cost:
+              type: number
+            notes:
+              type: string
+            attachment:
+              type: string
+              description: Base64 encoded attachment
+            status:
+              type: integer
+    responses:
+      200:
+        description: Collaboration updated successfully
+      500:
+        description: Error updating data
+    """
     data = request.json
 
     job_title = data.get('JobTitle')
@@ -88,11 +174,11 @@ def update_collaborate(id):
     cost = data.get('Cost')
     notes = data.get('Notes')
     status = data.get('Status')
-
     attachment_base64 = data.get('AttachmentURL')
-
 
     update_data(id, job_title, start_time, end_time, priority, content, with_person, transportation_mode,
                 next_appointment, referral, cost, notes, attachment_base64, status)
 
     return jsonify({'message': 'Data updated successfully!'}), 200
+
+
