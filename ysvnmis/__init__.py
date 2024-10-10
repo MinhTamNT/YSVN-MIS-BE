@@ -1,9 +1,9 @@
 import pyodbc
 from flask import Flask
 from flasgger import Swagger
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)
 app.secret_key = '*(&*(@*&(*@(^!(*@75876528378932^@%*&^(*@*@&#*'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SECRET_KEY'] = '38a5f73c-ff0f-4b81-b466-701071019a4d'

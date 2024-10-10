@@ -1,4 +1,4 @@
-from flask import app
+# from flask import app
 from ysvnmis import app
 import ysvnmis.api.collaborate.collabortae_api
 
